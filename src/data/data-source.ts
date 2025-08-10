@@ -1,13 +1,15 @@
-import 'reflect-metadata'
-import { DataSource } from 'typeorm'
-import { User } from '../entity/User'
+import 'reflect-metadata';
+import { DataSource } from 'typeorm';
 
-export const AppDataSource = new DataSource({
+const AppDataSource = new DataSource({
   type: 'sqlite',
-  database: 'database.sqlite',
+  database: '.../resources/data/database.sqlite',
   synchronize: true,
   logging: false,
-  entities: [User],
-  migrations: process.env.npm_lifecycle_event == 'typeorm' ? ['**/migrations/*.ts'] : [],
+  entities: [],
+  migrations:
+    process.env.npm_lifecycle_event === 'typeorm' ? ['**/migrations/*.ts'] : [],
   subscribers: []
-})
+});
+
+export default AppDataSource;

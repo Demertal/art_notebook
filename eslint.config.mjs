@@ -1,31 +1,82 @@
-import tseslint from '@electron-toolkit/eslint-config-ts'
-import eslintConfigPrettier from '@electron-toolkit/eslint-config-prettier'
-import eslintPluginReact from 'eslint-plugin-react'
-import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
-import eslintPluginReactRefresh from 'eslint-plugin-react-refresh'
+import path from 'node:path';
 
-export default tseslint.config(
-  { ignores: ['**/node_modules', '**/dist', '**/out'] },
-  tseslint.configs.recommended,
-  eslintPluginReact.configs.flat.recommended,
-  eslintPluginReact.configs.flat['jsx-runtime'],
+import { includeIgnoreFile } from '@eslint/compat';
+import js from '@eslint/js';
+import { configs, plugins, rules } from 'eslint-config-airbnb-extended';
+import { rules as prettierConfigRules } from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+import reactPlugin from 'eslint-plugin-react';
+
+const gitignorePath = path.resolve('.', '.gitignore');
+
+const jsConfig = [
+  // ESLint Recommended Rules
   {
-    settings: {
-      react: {
-        version: 'detect'
-      }
-    }
+    name: 'js/config',
+    ...js.configs.recommended
   },
+  // Stylistic Plugin
+  plugins.stylistic,
+  // Import X Plugin
+  plugins.importX,
+  // Airbnb Base Recommended Config
+  ...configs.base.recommended
+];
+
+const reactConfig = [
+  // React Plugin
+  plugins.react,
+  // React Hooks Plugin
+  plugins.reactHooks,
+  // React JSX A11y Plugin
+  plugins.reactA11y,
+  // Airbnb React Recommended Config
+  ...configs.react.recommended,
+  // Strict React Config
+  rules.react.strict,
   {
-    files: ['**/*.{ts,tsx}'],
+    ...reactPlugin.configs.flat['jsx-runtime']
+  }
+];
+
+const typescriptConfig = [
+  // TypeScript ESLint Plugin
+  plugins.typescriptEslint,
+  // Airbnb Base TypeScript Config
+  ...configs.base.typescript,
+  // Strict TypeScript Config
+  rules.typescript.typescriptEslintStrict,
+  // Airbnb React TypeScript Config
+  ...configs.react.typescript
+];
+
+const prettierConfig = [
+  // Prettier Plugin
+  {
+    name: 'prettier/plugin/config',
     plugins: {
-      'react-hooks': eslintPluginReactHooks,
-      'react-refresh': eslintPluginReactRefresh
-    },
-    rules: {
-      ...eslintPluginReactHooks.configs.recommended.rules,
-      ...eslintPluginReactRefresh.configs.vite.rules
+      prettier: prettierPlugin
     }
   },
-  eslintConfigPrettier
-)
+  // Prettier Config
+  {
+    name: 'prettier/config',
+    rules: {
+      ...prettierConfigRules,
+      'prettier/prettier': 'error'
+    }
+  }
+];
+
+export default [
+  // Ignore .gitignore files/folder in eslint
+  includeIgnoreFile(gitignorePath),
+  // Javascript Config
+  ...jsConfig,
+  // React Config
+  ...reactConfig,
+  // TypeScript Config
+  ...typescriptConfig,
+  // Prettier Config
+  ...prettierConfig
+];
